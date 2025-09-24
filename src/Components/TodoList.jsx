@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import './TodoList.css';
 
 const TodoList = () => {
-    // États initiaux
     const [todos, setTodos] = useState([]);
     const [headingInput, setHeadingInput] = useState('');
     const [listInputs, setListInputs] = useState({});
 
-    // Fonction pour ajouter un nouveau titre
     const handleAddTodo = () => {
         if (headingInput.trim() !== '') {
             setTodos([...todos, { heading: headingInput, lists: [] }]);
@@ -15,19 +13,21 @@ const TodoList = () => {
         }
     };
 
-    // Fonction pour supprimer un titre
     const handleDeleteTodo = (index) => {
         const newTodos = [...todos];
         newTodos.splice(index, 1);
         setTodos(newTodos);
+        
+        // Nettoyer aussi l'input correspondant
+        const newListInputs = { ...listInputs };
+        delete newListInputs[index];
+        setListInputs(newListInputs);
     };
 
-    // Fonction pour gérer les changements dans les inputs de liste
     const handleListInputChange = (index, value) => {
         setListInputs({ ...listInputs, [index]: value });
     };
 
-    // Fonction pour ajouter un élément à la liste
     const handleAddList = (index) => {
         if (listInputs[index] && listInputs[index].trim() !== '') {
             const newTodos = [...todos];
@@ -37,11 +37,22 @@ const TodoList = () => {
         }
     };
 
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleAddTodo();
+        }
+    };
+
+    const handleListKeyPress = (e, index) => {
+        if (e.key === 'Enter') {
+            handleAddList(index);
+        }
+    };
+
     return (
         <div className="todo-container">
             <h1 className="title">My Todo List</h1>
             
-            {/* Section d'ajout de titre */}
             <div className="input-container">
                 <input
                     type="text"
@@ -49,13 +60,13 @@ const TodoList = () => {
                     placeholder="Enter heading"
                     value={headingInput}
                     onChange={(e) => setHeadingInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
                 />
                 <button className="add-list-button" onClick={handleAddTodo}>
                     Add Heading
                 </button>
             </div>
 
-            {/* Section d'affichage des todos */}
             <div className="todo_main">
                 {todos.map((todo, index) => (
                     <div key={index} className="todo-card">
@@ -69,7 +80,6 @@ const TodoList = () => {
                             </button>
                         </div>
 
-                        {/* Affichage des éléments de la liste */}
                         <ul>
                             {todo.lists.map((list, listIndex) => (
                                 <li key={listIndex} className='todo_inside_list'>
@@ -78,7 +88,6 @@ const TodoList = () => {
                             ))}
                         </ul>
 
-                        {/* Section d'ajout d'éléments à la liste */}
                         <div className='add_list'>
                             <input
                                 type="text"
@@ -86,6 +95,7 @@ const TodoList = () => {
                                 placeholder='Add list'
                                 value={listInputs[index] || ''}
                                 onChange={(e) => handleListInputChange(index, e.target.value)}
+                                onKeyPress={(e) => handleListKeyPress(e, index)}
                             />
                             <button 
                                 className="add-list-button" 
